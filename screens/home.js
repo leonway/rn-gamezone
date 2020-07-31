@@ -1,9 +1,33 @@
 import React, { useState } from 'react'
-import { StyleSheet, View, Text, Button, TouchableOpacity, FlatList, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { StyleSheet, View, Text, Button, TouchableOpacity, FlatList, Modal, Animated, Easing, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import { globalStyles } from "../styles/global"
 import Card from '../shared/card'
 import { Icon } from '@ui-kitten/components';
 import ReviewForm from './reviewForm'
+
+const AIcon = Animated.createAnimatedComponent(Icon)
+ let opacity = new Animated.Value(0);
+  const animate = easing => {
+    opacity.setValue(0);
+    Animated.timing(opacity, {
+      useNativeDriver:false,
+      toValue: 1,
+      duration: 1200,
+      easing
+    }).start();
+  };
+  const size = opacity.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 80]
+  });
+  const animatedStyles = [
+    // styles.box,
+    {
+      opacity,
+      width: size,
+      height: size
+    }
+  ];
 
 export default function Home({ navigation }) {
   const [modalOpen,setModalOpen] = useState(false)
@@ -28,12 +52,15 @@ export default function Home({ navigation }) {
           onPress={Keyboard.dismiss}
         >
           <View style={s.modalContent}>
-            <Icon name="close" style={[s.modalToggle,s.modalClose]} fill="black" onPress={()=>setModalOpen(false)}/>
+            <AIcon name="close" style={[s.modalToggle,s.modalClose,animatedStyles]} fill="black" onPress={()=>setModalOpen(false)}/>
             <ReviewForm addReview={addReview} />
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <Icon name="plus-square-outline" style={s.modalToggle} fill="black" onPress={()=>setModalOpen(true)}/>
+      <Icon name="plus-square-outline" style={s.modalToggle} fill="black" onPress={()=>{
+        setModalOpen(true)
+          animate(Easing.inOut(Easing.elastic(1)))
+      }}/>
       <FlatList 
         data = {reviews}
         renderItem={({item})=>(
